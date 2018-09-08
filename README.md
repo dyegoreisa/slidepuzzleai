@@ -1,0 +1,2 @@
+# slidepuzzleai
+Exercícios de AI
