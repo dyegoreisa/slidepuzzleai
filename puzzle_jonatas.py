@@ -2,15 +2,59 @@ import copy
 import json
 import random
 from time import time
-from time import sleep
-
 import numpy
-import scipy
-from scipy.spatial.distance import cosine
+
+
+# ESTRATÉGIAS DE BUSCA CEGA
+class DepthSearch(object):
+    def get_actual_solution(self, solutions, goal):
+        # PEGA ULTIMA
+        return solutions.pop()
+
+    def __str__(self):
+        return "DepthSearch"
+
+
+class BreathFirstSearch(object):
+    def get_actual_solution(self, solutions, goal):
+        # PEGA PRIMEIRA
+        return solutions.pop(0)
+
+    def __str__(self):
+        return "BreathFirstSearch"
+
+
+# OUTRAS ESTRATEGIAS
+class MelhorzinhaSearch(object):
+    def get_actual_solution(self, solutions, goal):
+
+        # verifica qual esta mais proxima da solucao
+        i = 0
+        atual = 999999999
+        i_atual = -1
+        for s in solutions:
+            # results2 = 1 - scipy.spatial.distance.cdist(s, goal, 'cosine')
+            # numpy.matrix.mean()
+            m1 = numpy.matrix(s)
+            m1 = numpy.matrix.mean(m1)
+            m2 = numpy.matrix(goal)
+            m2 = numpy.matrix.mean(m2)
+
+            if m2 - m1 < atual:
+                atual = m2 - m1
+                i_atual = i
+            i = i + 1
+
+        return solutions.pop(i_atual)
+
+    def __str__(self):
+        return "MelhorzinhaSearch"
 
 
 class Puzzle():
     matrix = None
+
+    strategy = None
 
     goal_solution = [
         [1, 2, 3],
@@ -26,8 +70,9 @@ class Puzzle():
 
     start_time = None
 
-    def __init__(self, matrix):
+    def __init__(self, matrix, strategy=DepthSearch):
         self.matrix = matrix
+        self.strategy = strategy
         # self.blank_pos = self.find_blank_position(self.matrix)
 
     def get_possible_paths(self, blank_pos):
@@ -120,9 +165,9 @@ class Puzzle():
     def solve(self):
         s = self.matrix
 
-        # strategy = DepthSearch()
+        strategy = self.strategy()
         # strategy = BreathFirstSearch()
-        strategy = MelhorzinhaSearch()
+        # strategy = MelhorzinhaSearch()
 
         self.start_time = time()
 
@@ -144,13 +189,11 @@ class Puzzle():
         # self.actual = self.stack.pop()
         self.actual = strategy.get_actual_solution(self.solutions, self.goal_solution)
 
-
         self.visited.add(json.dumps(self.actual))
         print("TEST:")
         self.print_matrix(self.actual)
 
         print('BLANK_POS: ', self.find_blank_position(self.actual))
-
 
         if self.actual == self.goal_solution:
             print("SOLUTION FOUND!!!!")
@@ -191,67 +234,14 @@ class Puzzle():
             self.matrix = self.move(possible_paths[rand_move], self.matrix)
 
 
-
-# ESTRATÉGIAS DE BUSCA CEGA
-class DepthSearch(object):
-    def get_actual_solution(self, solutions, goal):
-        # PEGA ULTIMA
-        return solutions.pop()
-
-    def __str__(self):
-        return "DepthSearch"
-
-
-class BreathFirstSearch(object):
-    def get_actual_solution(self, solutions, goal):
-        # PEGA PRIMEIRA
-        return solutions.pop(0)
-
-    def __str__(self):
-        return "BreathFirstSearch"
-
-
-
-# OUTRAS ESTRATEGIAS
-class MelhorzinhaSearch(object):
-    def get_actual_solution(self, solutions, goal):
-
-        # verifica qual esta mais proxima da solucao
-        i=0
-        atual = 999999999
-        i_atual = -1
-        for s in solutions:
-            # results2 = 1 - scipy.spatial.distance.cdist(s, goal, 'cosine')
-            # numpy.matrix.mean()
-            m1 = numpy.matrix(s)
-            m1 = numpy.matrix.mean(m1)
-            m2 = numpy.matrix(goal)
-            m2 = numpy.matrix.mean(m2)
-
-            if m2 - m1 < atual:
-                atual = m2-m1
-                i_atual = i
-            i = i + 1
-
-
-
-        return solutions.pop(i_atual)
-
-    def __str__(self):
-        return "MelhorzinhaSearch"
-
-
-
-
-
 if __name__ == '__main__':
     puzzle = Puzzle([
         [1, 2, 3],
         [4, 5, 6],
         [7, 8, 0]
-    ])
-    puzzle.sort(3)
+    ], strategy=DepthSearch)
 
+    puzzle.sort(100)
     puzzle.print_matrix(puzzle.matrix)
-    puzzle.solve()
 
+    puzzle.solve()
