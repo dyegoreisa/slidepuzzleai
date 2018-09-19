@@ -173,8 +173,9 @@ class Puzzle():
                 max_i = i
             i = i + 1
 
-        print('BEST FOUND SOLUTION:', str(max_i + 1) + 'a')
-        self.found_solutions[max_i].print_solution()
+        if len(self.found_solutions) > 0:
+            print('BEST FOUND SOLUTION:', str(max_i + 1) + 'a')
+            self.found_solutions[max_i].print_solution()
 
     def solve(self):
         s = self.matrix
@@ -342,19 +343,56 @@ class AStarSearch(object):
         return "AStarSearch"
 
 
+class GreedySearch(object):
+    """
+    Greedy
+    """
+
+    def __init__(self, heuristica):
+        self.heuristica = heuristica
+
+    def get_actual_solution(self, goal):
+
+        # verifica qual esta mais proxima da solucao
+        aux = []
+        for s in self.solutions:
+            count = 0
+            for i in range(0, len(s)):
+                for j in range(0, len(s[i])):
+                    if self.heuristica == 'numeros_dentro_de_posicao':
+                        if s[i][j] == goal[i][j]:
+                            count = count + 1
+                    elif self.heuristica == 'numeros_fora_de_posicao':
+                        if s[i][j] != goal[i][j]:
+                            count = count + 1
+            aux.insert(count,s) #adiciona na lista aux baseado no valor do count
+            aux.sort() #ordenada por count
+
+        self.solutions.clear()
+        for s in aux:
+            self.solutions.append(s)#adiciona no solutions baseado no count(no valor mais ganancioso)
+
+        return (self.solutions.pop(0), count)
+
+    def __str__(self):
+        return "GreedySearch"
+
+
 if __name__ == '__main__':
     # strategy = AStarSearch(heuristica='numeros_fora_de_posicao')
     strategy = AStarSearch(heuristica='numeros_dentro_de_posicao')
     # strategy = DepthSearch()
     # strategy = BreathFirstSearch()
+    # strategy = GreedySearch(heuristica='numeros_fora_de_posicao')
+    # strategy = GreedySearch(heuristica='numeros_dentro_de_posicao')
 
     puzzle = Puzzle([
         [1, 2, 3],
         [4, 5, 6],
         [7, 8, 0]
-    ], strategy=strategy, satisficing=False, max_iterations=5000, max_solutions=1)
+    ], strategy=strategy, satisficing=False, max_iterations=350000, max_solutions=1)
 
     puzzle.randomize(9000)
     puzzle.print_matrix(puzzle.matrix)
 
-    puzzle.solve()
+puzzle.solve()
