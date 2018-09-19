@@ -162,10 +162,19 @@ class Puzzle():
             if isinstance(s, Solution):
                 s.print_solution()
 
+        # GET BEST SOLUTION
+        max_f = -1
+        i = 0
+        max_i = 0
+        for s in self.found_solutions:
+            f = s.g + (s.h if s.h is not None else 0)
+            if f >= max_f:
+                max_f = s.g + f
+                max_i = i
+            i = i + 1
 
-        print('BEST FOUND SOLUTION:')
-
-
+        print('BEST FOUND SOLUTION:', str(max_i + 1) + 'a')
+        self.found_solutions[max_i].print_solution()
 
     def solve(self):
         s = self.matrix
@@ -219,7 +228,6 @@ class Puzzle():
                 print('STOPPED ON SATISFICING...')
                 self.print_found_solutions()
                 return True
-
 
         return False
 
@@ -301,6 +309,7 @@ class AStarSearch(object):
     """
     A*
     """
+
     def __init__(self, heuristica):
         self.heuristica = heuristica
 
@@ -343,7 +352,7 @@ if __name__ == '__main__':
         [1, 2, 3],
         [4, 5, 6],
         [7, 8, 0]
-    ], strategy=strategy, satisficing=False, max_iterations=5000, max_solutions=2)
+    ], strategy=strategy, satisficing=False, max_iterations=5000, max_solutions=1)
 
     puzzle.randomize(9000)
     puzzle.print_matrix(puzzle.matrix)
